@@ -25,8 +25,15 @@ grabInput();
 // //spotify section
 
 if (process.argv[2] === "concert-this"){
-    console.log("concert");
-    grabInput();
+    var bandUrl = "https://rest.bandsintown.com/artists/" + userSearch + "/events?app_id=codingbootcamp";
+    
+
+    axios.get(bandUrl).then(function(response){
+        console.log("Venue: " + response.EventData.type);
+        // console.log("Venue: " + response.venue);
+        // console.log("Date and Time: " + response.datetime);
+        // console.log("test: " + response.EventData[0].id);
+    })
     console.log("user search: " + userSearch);
 } else if (process.argv[2] === "spotify-this-song"){
     var spotifyUrl = "https://api.spotify.com/v1/search?query=" + userSearch + "&type=track&offset=0&limit=20";
@@ -38,18 +45,36 @@ if (process.argv[2] === "concert-this"){
     )
 } else if (process.argv[2] === "movie-this"){
     var omdbUrl = "http://www.omdbapi.com/?t=" + userSearch + "&y=&plot=short&apikey=trilogy";
-    axios.get(omdbUrl).then(
-        function(response){
-            console.log("Title: " + response.data.Title);
-            console.log("Year Released: " + response.data.Year);
-            console.log("IMD rating: " + response.data.Ratings[0].Value);
-            // console.log(response.data.Ratings[1]);
-            console.log("Rotten Tomatoes rating: " + response.data.Ratings[1].Value);
-            console.log("Language: " + response.data.Language);
-            console.log("Plot: " + response.data.Plot);
-            console.log("Actors: " + response.data.Actors);
-        }
-    )
+    var omdbDefault = "http://www.omdbapi.com/?t=Mr+Nobody&y=&plot=short&apikey=trilogy";
+    
+    if (userSearch){
+        axios.get(omdbUrl).then(
+            function(response){
+                console.log("Title: " + response.data.Title);
+                console.log("Year Released: " + response.data.Year);
+                console.log("IMD rating: " + response.data.Ratings[0].Value);
+                // console.log(response.data.Ratings[1]);
+                console.log("Rotten Tomatoes rating: " + response.data.Ratings[1].Value);
+                console.log("Language: " + response.data.Language);
+                console.log("Plot: " + response.data.Plot);
+                console.log("Actors: " + response.data.Actors);
+            }
+        )
+    } else {
+        axios.get(omdbDefault).then(
+            function(response){
+                console.log("Title: " + response.data.Title);
+                console.log("Year Released: " + response.data.Year);
+                console.log("IMD rating: " + response.data.Ratings[0].Value);
+                // console.log(response.data.Ratings[1]);
+                console.log("Rotten Tomatoes rating: " + response.data.Ratings[1].Value);
+                console.log("Language: " + response.data.Language);
+                console.log("Plot: " + response.data.Plot);
+                console.log("Actors: " + response.data.Actors);
+            }
+        )
+
+    }
 } else if (process.argv[2] === "do-what-it-says"){
 
 }
