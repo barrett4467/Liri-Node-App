@@ -5,44 +5,56 @@ var moment = require('moment');
 //vars for spotify 
 var Spotify = require('node-spotify-api');
 var keys = require("./keys.js");
-var spotify = new Spotify(keys.spotify);
+var spotify = new Spotify({
+    id: "7b4855e243894a419ee246d8d11015d8",
+    secret: "271dbb1ba3b041fab2e453c9930b18ce"
+  });
 
 var userSearch = "";
-
-function grabInput (){
-    for (var i = 3;  i < process.argv.length; i++){
+function search(){
+    for (i = 3; i < process.argv.length; i++){
         if (i === 3){
             userSearch += `${process.argv[i]}`
         } else {
             userSearch += `+${process.argv[i]}`
         }
-       
     }
-    console.log(userSearch);
 }
-
-grabInput();
-// //spotify section
-
+search ();
 if (process.argv[2] === "concert-this"){
     var bandUrl = "https://rest.bandsintown.com/artists/" + userSearch + "/events?app_id=codingbootcamp";
     
-
     axios.get(bandUrl).then(function(response){
-        console.log("Venue: " + response.EventData.type);
-        // console.log("Venue: " + response.venue);
-        // console.log("Date and Time: " + response.datetime);
+        var time = moment(response.data[0].datetime).format("MM/DD/YYYY");
+
+        console.log("Venue: " + response.data[0].venue.name);
+        console.log("Location: " + response.data[0].venue.city + ", " + response.data[0].venue.region + " " + response.data[0].venue.country);
+        console.log("Date and Time: " + time);
         // console.log("test: " + response.EventData[0].id);
     })
     console.log("user search: " + userSearch);
 } else if (process.argv[2] === "spotify-this-song"){
-    var spotifyUrl = "https://api.spotify.com/v1/search?query=" + userSearch + "&type=track&offset=0&limit=20";
+    var spotifyUrl = "https://api.spotify.com/" + spotify + "/search?query=" + userSearch + "&type=track&offset=0&limit=2";
 
-    axios.get(spotifyUrl).then(
-        function(response){
-            console.log(response.tracks);
+    spotify.search({ type: 'track', query: userSearch}, function(err, data) {
+        if (err) {
+          return console.log('Error occurred: ' + err);
         }
-    )
+       
+      console.log("Artist: " + data.tracks.items[0].album.artists[0].name); 
+      console.log("Title: " + data.tracks.items[0].name);
+      console.log("Preview: " + data.tracks.items[0].external_urls.spotify);
+      console.log("Album: " + data.tracks.items[0].album.name);
+      });
+    // axios.get(spotifyUrl).then(
+        
+    //     function(response){
+    //         console.log(response.data);
+    //     }
+    // )
+
+    //https://accounts.spotify.com/api/token?grant_type=authorization_code&code="+code+"&redirect_uri=myurl&client_secret=mysecret&client_id=myid
+ 
 } else if (process.argv[2] === "movie-this"){
     var omdbUrl = "http://www.omdbapi.com/?t=" + userSearch + "&y=&plot=short&apikey=trilogy";
     var omdbDefault = "http://www.omdbapi.com/?t=Mr+Nobody&y=&plot=short&apikey=trilogy";
