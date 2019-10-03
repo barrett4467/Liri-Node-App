@@ -250,9 +250,8 @@ function playGame (){
         
                     } else {
                         callBands(dataArr[5]);
-        
+                        
                     }
-                    setTimeout(playAgain, 3000);
                 }
                 decider();      
               

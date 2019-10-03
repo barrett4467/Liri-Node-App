@@ -1,3 +1,22 @@
 Option Chosen: Concert Artist Searched for: George Strait Try again: Yes 
 Option Chosen: Song Song searched for: My Girl Try again: Yes 
 Option Chosen: Movie Movie Searched for: The Little Prince Try again: No 
+
+Option Chosen: Surprise Me! Try again: No Try again: No 
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Surprise Me! Try again: No 
+Option Chosen: Concert Artist Searched for: George Strait Try again: Yes 
+Option Chosen: Song Song searched for: My Girl Try again: Yes 
+Option Chosen: Movie Movie Searched for: Titanic Try again: Yes 
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Concert Artist Searched for:  
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Surprise Me! Try again: No 
+Option Chosen: Concert Artist Searched for: George Strait Try again: Yes 
+Option Chosen: Song Song searched for: My Girl Try again: Yes 
+Option Chosen: Movie Movie Searched for: Titanic Try again: Yes 
+Option Chosen: Surprise Me! Try again: Yes 
+Option Chosen: Surprise Me! Try again: No 
