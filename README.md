@@ -5,5 +5,5 @@ Liri-node is an application built with node.js that utilizes inquire to ask a se
 ## API's Used
 Omdb for movie searched, Bands in Town for concerts, and Spotify to provide song data
 
-##Walk-Through
+## Walk-Through
 ![](walkthrough.gif)
