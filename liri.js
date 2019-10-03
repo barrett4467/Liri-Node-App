@@ -1,6 +1,8 @@
-require("dotenv").config();
-var axios = require('axios');
-var moment = require('moment');
+require("dotenv").config(); //this literally reads the env folder and helps authorize spotify
+var axios = require('axios'); //api call program
+var moment = require('moment'); //this is so we can specify the concert date format
+var inquirer = require('inquirer'); //asks the questions 
+var fs = require("fs"); //this helps us read the .txt file for do-what-it-says and allows the push to log
 
 //vars for spotify 
 var Spotify = require('node-spotify-api');
@@ -10,96 +12,254 @@ var spotify = new Spotify({
     secret: "271dbb1ba3b041fab2e453c9930b18ce"
   });
 
-var userSearch = "";
-function search(){
-    for (i = 3; i < process.argv.length; i++){
-        if (i === 3){
-            userSearch += `${process.argv[i]}`
-        } else {
-            userSearch += `+${process.argv[i]}`
-        }
+// band function 
+function callBands (search){
+    if (search){
+        var bandUrl = "https://rest.bandsintown.com/artists/" + search + "/events?app_id=codingbootcamp";
+        
+        axios.get(bandUrl).then(function(response){
+            var time = moment(response.data[0].datetime).format("MM/DD/YYYY");
+            console.log("============================");
+            console.log("Venue: " + response.data[0].venue.name);
+            console.log("Location: " + response.data[0].venue.city + ", " + response.data[0].venue.region + " " + response.data[0].venue.country);
+            console.log("Date and Time: " + time);
+            console.log("============================");
+            // console.log("test: " + response.EventData[0].id);
+            
+            setTimeout(tryAgain, 2000);
+        }).catch(function(){
+            console.log("We were unable to find any results...");
+            setTimeout(tryAgain, 1000);
+        })
+
+    } else {
+        console.log("Hmmm that doesn't seem to be valid. Please try again!");
+        setTimeout(playGame, 0500);
     }
 }
-search ();
-if (process.argv[2] === "concert-this"){
-    var bandUrl = "https://rest.bandsintown.com/artists/" + userSearch + "/events?app_id=codingbootcamp";
-    
-    axios.get(bandUrl).then(function(response){
-        var time = moment(response.data[0].datetime).format("MM/DD/YYYY");
 
-        console.log("Venue: " + response.data[0].venue.name);
-        console.log("Location: " + response.data[0].venue.city + ", " + response.data[0].venue.region + " " + response.data[0].venue.country);
-        console.log("Date and Time: " + time);
-        // console.log("test: " + response.EventData[0].id);
-    })
-    console.log("user search: " + userSearch);
-} else if (process.argv[2] === "spotify-this-song"){
-    var spotifyUrl = "https://api.spotify.com/" + spotify + "/search?query=" + userSearch + "&type=track&offset=0&limit=2";
+//spotify function
+function callSpotify(search) {
+    if (search){
 
-    spotify.search({ type: 'track', query: userSearch}, function(err, data) {
-        if (err) {
-          return console.log('Error occurred: ' + err);
-        }
-       
-      console.log("Artist: " + data.tracks.items[0].album.artists[0].name); 
-      console.log("Title: " + data.tracks.items[0].name);
-      console.log("Preview: " + data.tracks.items[0].external_urls.spotify);
-      console.log("Album: " + data.tracks.items[0].album.name);
-      });
-    // axios.get(spotifyUrl).then(
-        
-    //     function(response){
-    //         console.log(response.data);
-    //     }
-    // )
+        spotify.search({ type: 'track', query: search}, function(err, data) {
+            if (err) {
+                console.log("We were unable to find any results...");
+                setTimeout(tryAgain, 1000);
+                return
+            }
+            console.log("============================");
+            console.log("Artist: " + data.tracks.items[0].album.artists[0].name); 
+            console.log("Title: " + data.tracks.items[0].name);
+            console.log("Preview: " + data.tracks.items[0].external_urls.spotify);
+            console.log("Album: " + data.tracks.items[0].album.name);
+            console.log("============================");
+            setTimeout(tryAgain, 1000);
+        })
 
-    //https://accounts.spotify.com/api/token?grant_type=authorization_code&code="+code+"&redirect_uri=myurl&client_secret=mysecret&client_id=myid
- 
-} else if (process.argv[2] === "movie-this"){
-    var omdbUrl = "http://www.omdbapi.com/?t=" + userSearch + "&y=&plot=short&apikey=trilogy";
+    } else {
+        //this just sets a default song if nothing is chosen 
+        // Eventually I'll set to "The Sign" by Ace of Base 
+        spotify.search({type: 'track', query: 'I Want it That Way'}, function(err, data) {
+            if (err) {
+                return console.log('Error occurred: ' + err);
+            }
+            console.log("\n");
+            console.log("You didn't input anything...Have fun with this!");
+            console.log("============================");
+            console.log("Artist: " + data.tracks.items[0].album.artists[0].name); 
+            console.log("Title: " + data.tracks.items[0].name);
+            console.log("Preview: " + data.tracks.items[0].external_urls.spotify);
+            console.log("Album: " + data.tracks.items[0].album.name);
+            console.log("============================");
+            
+            setTimeout(tryAgain, 1000);
+        });
+    }
+}
+
+//omdb function
+function callOmdb (search){
+    var omdbUrl = "http://www.omdbapi.com/?t=" + search + "&y=&plot=short&apikey=trilogy";
     var omdbDefault = "http://www.omdbapi.com/?t=Mr+Nobody&y=&plot=short&apikey=trilogy";
     
-    if (userSearch){
+    if (search){
         axios.get(omdbUrl).then(
             function(response){
+                console.log("============================");
                 console.log("Title: " + response.data.Title);
                 console.log("Year Released: " + response.data.Year);
                 console.log("IMD rating: " + response.data.Ratings[0].Value);
-                // console.log(response.data.Ratings[1]);
                 console.log("Rotten Tomatoes rating: " + response.data.Ratings[1].Value);
                 console.log("Language: " + response.data.Language);
                 console.log("Plot: " + response.data.Plot);
                 console.log("Actors: " + response.data.Actors);
+                console.log("============================");
+                setTimeout(tryAgain, 1000);
             }
-        )
+        ).catch(function(){
+            console.log("We were unable to find any results...");
+            setTimeout(tryAgain, 1000);
+            return
+        })
     } else {
         axios.get(omdbDefault).then(
             function(response){
+                console.log("\n");
+                console.log("You didn't input anything...Seriously why are you here?");
+                console.log("============================");
                 console.log("Title: " + response.data.Title);
                 console.log("Year Released: " + response.data.Year);
                 console.log("IMD rating: " + response.data.Ratings[0].Value);
-                // console.log(response.data.Ratings[1]);
                 console.log("Rotten Tomatoes rating: " + response.data.Ratings[1].Value);
                 console.log("Language: " + response.data.Language);
+                console.log("\n");
                 console.log("Plot: " + response.data.Plot);
                 console.log("Actors: " + response.data.Actors);
+                console.log("============================");
+                setTimeout(tryAgain, 1000);
             }
         )
 
     }
-} else if (process.argv[2] === "do-what-it-says"){
-
 }
 
-// {"Title":"My Girl",
-// "Year":"1991",
-// "Rated":"PG",
-// "Released":"27 Nov 1991",
-// "Runtime":"102 min",
-// "Genre":"Comedy, Drama, Family, Romance","Director":"Howard Zieff",
-// "Writer":"Laurice Elehwany",
-// "Actors":"Dan Aykroyd, Jamie Lee Curtis, Macaulay Culkin, Anna Chlumsky",
-// "Plot":"A young girl, on the threshold of her teen years, finds her life turning upside down, when she is accompanied by an unlikely friend.","Language":"English",
-// "Country":"USA",
-// "Awards":"2 wins & 5 nominations.","Poster":"https://m.media-amazon.com/images/M/MV5BYWM2ZDliNjItZTcxOC00NTY2LWE1ODctNzRhNGM3YWIyYjBiXkEyXkFqcGdeQXVyNTIzOTk5ODM@._V1_SX300.jpg",
-// "Ratings":[{"Source":"Internet Movie Database","Value":"6.9/10"},{"Source":"Rotten Tomatoes","Value":"56%"},{"Source":"Metacritic","Value":"56/100"}],"Metascore":"56","imdbRating":"6.9","imdbVotes":"66,878","imdbID":"tt0102492","Type":"movie","DVD":"26 May 1998","BoxOffice":"N/A","Production":"Sony Pictures Home Entertainment","Website":"N/A","Response":"True"}
+
+//We'll push the inputs to this in a second 
+var userSearch = "";
+
+
+function tryAgain (){
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "Try Again??",
+            choices: ["Yes", "No"],
+            name: "again"
+        }
+    ]).then(function(answer){
+        if (answer.again === "Yes"){
+            playGame();
+        } else {
+            console.log("Thanks for playing!!");
+        }
+        var text = "Try again: " + answer.again + " ";
+        //this changes the log.txt file 
+        fs.appendFile("log.txt", text, function(error) {
+            if (error){
+                console.log(err);
+            }
+        })
+
+    })
+}
+
+//just a wrapper for the inquirer portion of app 
+function playGame (){
+    inquirer.prompt ([
+        {
+            type: "list",
+            message: "What would you like to search for?",
+            choices: ["Concert", "Song", "Movie", "Surprise Me!"],
+            name: "options"
+        }
+    ]).then(function(answer){
+        var text = "\nOption Chosen: " + answer.options + " ";
+        //this changes the log.txt file 
+        fs.appendFile("log.txt", text, function(error) {
+            if (error){
+                console.log(err);
+            }
+        })
+        
+        if (answer.options === "Concert"){
+            inquirer.prompt ([
+                {
+                    message: "Enter Artist Name",
+                    name: "artist"
+                }
+            ]).then(function(answer){
+                var text = "Artist Searched for: " + answer.artist + " ";
+
+                //this is where the userSearch is pushed to array 
+                userSearch = answer.artist;    
+                callBands(userSearch);
+
+                //this changes the log.txt file 
+                fs.appendFile("log.txt", text, function(error) {
+                    if (error){
+                        console.log(err);
+                    }
+                })
+            })
+        
+        } else if (answer.options === "Song"){
+            inquirer.prompt ([
+                {
+                    message: "Enter Song Title",
+                    name: "song"
+                }
+            ]).then(function(answer){
+                userSearch = answer.song; 
+                callSpotify(userSearch);
+
+                var text = "Song searched for: " + answer.song + " ";
+                //this changes the log.txt file 
+                fs.appendFile("log.txt", text, function(error) {
+                    if (error){
+                        console.log(err);
+                    }
+                })
+            })
+        
+        } else if (answer.options === "Movie"){
+            inquirer.prompt ([
+                {
+                    message: "Enter Movie Title",
+                    name: "movie"
+                }
+            ]).then(function(answer){
+                userSearch = answer.movie; 
+                callOmdb(userSearch);
+
+                var text = "Movie Searched for: " + answer.movie + " ";
+                //this changes the log.txt file 
+                fs.appendFile("log.txt", text, function(error) {
+                    if (error){
+                        console.log(err);
+                    }
+                })
+            })
+        
+        } else if (answer.options === "Surprise Me!"){
+            fs.readFile("random.txt", "utf8", function(error, data) {
+        
+                if (error) {
+                  return console.log(error);
+                }
+                //this stores the data from random in a handy-dandy array for later use
+                var dataArr = data.split(", ");
+        
+                //were going to randomize this a bit so its not as much data at once 
+                function decider (){
+                    if (Math.floor(Math.random()* 3 + 1) === 1){
+                        callSpotify(dataArr[1]);
+        
+                    }else if (Math.floor(Math.random()* 3 + 1) === 2){
+                        callOmdb(dataArr[3]);
+        
+                    } else {
+                        callBands(dataArr[5]);
+        
+                    }
+                    setTimeout(playAgain, 3000);
+                }
+                decider();      
+              
+              });
+        
+        }
+    })
+}
+
+playGame();
